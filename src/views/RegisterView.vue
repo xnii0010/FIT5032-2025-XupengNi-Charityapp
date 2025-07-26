@@ -4,7 +4,7 @@
       <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
           <div class="card shadow">
-            <div class="card-header bg-success text-white text-center">
+            <div class="card-header bg-primary text-white text-center">
               <h3 class="mb-0"><i class="bi bi-person-plus me-2"></i>Register</h3>
             </div>
 
@@ -191,10 +191,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/users'
 
-// Initialize router and store
+// Initialize router and stores
 const router = useRouter()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 
 // Form data
 const formData = ref({
@@ -356,24 +358,41 @@ const handleRegister = async () => {
   registerSuccess.value = ''
 
   try {
+    // Check if user already exists using user store
+    if (userStore.emailExists(formData.value.email)) {
+      registerError.value = 'An account with this email already exists'
+      return
+    }
+
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    // Mock registration logic
+    // Create new user data
     const userData = {
-      id: Date.now(),
       name: formData.value.name,
       email: formData.value.email,
       phone: formData.value.phone,
       role: formData.value.role,
+      password: formData.value.password, // In real app, this should be hashed
     }
+
+    // Add user to the user store
+    const newUser = userStore.addUser(userData)
 
     // Simulate successful registration
     registerSuccess.value = 'Account created successfully! Logging you in...'
 
-    // Auto-login after successful registration
+    // Auto-login after successful registration (remove password from login data)
+    const loginData = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: newUser.role,
+    }
+
     setTimeout(() => {
-      authStore.login(userData)
+      authStore.login(loginData)
       router.push('/')
     }, 1000)
   } catch (error) {
@@ -402,17 +421,21 @@ const handleRegister = async () => {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #198754;
-  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  border-color: var(--purple-primary);
+  box-shadow: 0 0 0 0.2rem var(--purple-shadow-light);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #198754 0%, #157347 100%);
+  background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-primary-dark) 100%);
   border: none;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+  background: linear-gradient(
+    135deg,
+    var(--purple-primary-dark) 0%,
+    var(--purple-primary-darker) 100%
+  );
 }
 
 .btn-success:disabled {
@@ -426,7 +449,7 @@ const handleRegister = async () => {
 
 .form-text {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: var(--purple-text-secondary);
 }
 
 /* Responsive design */

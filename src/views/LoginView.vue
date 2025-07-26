@@ -123,10 +123,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/users'
 
-// Initialize router and store
+// Initialize router and stores
 const router = useRouter()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 
 // Form data and validation
 const formData = ref({
@@ -183,7 +185,7 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-// Demo account functions
+// Demo account functions - now using data from users.json
 const fillDemoUser = () => {
   formData.value.email = 'user@example.com'
   formData.value.password = 'password123'
@@ -215,31 +217,16 @@ const handleLogin = async () => {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Mock authentication logic
+    // Use user store to authenticate
     const { email, password } = formData.value
+    const authenticatedUser = userStore.authenticateUser(email, password)
 
-    // Demo accounts for testing
-    const demoAccounts = {
-      'user@example.com': { password: 'password123', role: 'user', name: 'John Doe' },
-      'admin@example.com': { password: 'admin123', role: 'admin', name: 'Admin User' },
-      'volunteer@example.com': { password: 'volunteer123', role: 'volunteer', name: 'Jane Smith' },
-    }
-
-    const account = demoAccounts[email]
-
-    if (account && account.password === password) {
+    if (authenticatedUser) {
       // Successful login
-      const userData = {
-        id: Date.now(),
-        email: email,
-        name: account.name,
-        role: account.role,
-      }
-
-      authStore.login(userData)
+      authStore.login(authenticatedUser)
 
       // Redirect to appropriate page based on role
-      if (account.role === 'admin') {
+      if (authenticatedUser.role === 'admin') {
         router.push('/dashboard')
       } else {
         router.push('/')
@@ -271,18 +258,19 @@ const handleLogin = async () => {
   border-radius: 10px 10px 0 0 !important;
 }
 
-.form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--purple-primary);
+  box-shadow: 0 0 0 0.2rem var(--purple-shadow-light);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-primary-dark) 100%);
   border: none;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  background: linear-gradient(135deg, var(--purple-primary-dark) 0%, var(--purple-primary-darker) 100%);
 }
 
 .btn-primary:disabled {
