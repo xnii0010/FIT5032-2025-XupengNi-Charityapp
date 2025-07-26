@@ -1,0 +1,125 @@
+/* Purple Theme Color Scheme */
+:root {
+  /* Primary Purple Colors */
+  --purple-primary: #6f42c1;           /* Main purple */
+  --purple-primary-dark: #5a2d91;      /* Darker purple for hover states */
+  --purple-primary-darker: #4c1d82;    /* Even darker for active states */
+  --purple-primary-light: #8b5cf6;     /* Lighter purple for accents */
+  
+  /* Secondary Colors */
+  --purple-secondary: #e6d7ff;         /* Light lavender */
+  --purple-secondary-light: #f3e8ff;   /* Very light lavender */
+  --purple-secondary-dark: #d1b3ff;    /* Medium lavender */
+  
+  /* Accent Colors */
+  --purple-accent: #a855f7;            /* Bright purple accent */
+  --purple-accent-light: #c084fc;      /* Light accent */
+  --purple-accent-dark: #9333ea;       /* Dark accent */
+  
+  /* Complementary Colors */
+  --purple-gold: #f59e0b;              /* Gold accent for highlights */
+  --purple-gold-light: #fbbf24;        /* Light gold */
+  --purple-gold-dark: #d97706;         /* Dark gold */
+  
+  /* Neutral Colors */
+  --purple-gray: #6b7280;              /* Gray for text */
+  --purple-gray-light: #9ca3af;        /* Light gray */
+  --purple-gray-dark: #4b5563;         /* Dark gray */
+  
+  /* Background Colors */
+  --purple-bg-primary: #faf5ff;        /* Very light purple background */
+  --purple-bg-secondary: #f8f9fa;      /* Light neutral background */
+  --purple-bg-card: #ffffff;           /* Card background */
+  
+  /* Text Colors */
+  --purple-text-primary: #1f2937;      /* Main text color */
+  --purple-text-secondary: #6b7280;    /* Secondary text color */
+  --purple-text-light: #9ca3af;        /* Light text color */
+  --purple-text-white: #ffffff;        /* White text */
+  
+  /* Border Colors */
+  --purple-border-light: #e5e7eb;      /* Light border */
+  --purple-border-medium: #d1d5db;     /* Medium border */
+  --purple-border-dark: #9ca3af;       /* Dark border */
+  
+  /* Shadow Colors */
+  --purple-shadow-light: rgba(111, 66, 193, 0.1);   /* Light purple shadow */
+  --purple-shadow-medium: rgba(111, 66, 193, 0.2);  /* Medium purple shadow */
+  --purple-shadow-dark: rgba(111, 66, 193, 0.3);    /* Dark purple shadow */
+  --purple-shadow-black: rgba(0, 0, 0, 0.1);        /* Black shadow */
+  
+  /* Status Colors (keeping some variety) */
+  --purple-success: #10b981;           /* Success green */
+  --purple-warning: #f59e0b;           /* Warning gold */
+  --purple-danger: #ef4444;            /* Danger red */
+  --purple-info: var(--purple-accent); /* Info uses purple accent */
+}
+
+/* Bootstrap Color Overrides */
+:root {
+  --bs-primary: var(--purple-primary);
+  --bs-primary-rgb: 111, 66, 193;
+  --bs-secondary: var(--purple-secondary);
+  --bs-success: var(--purple-success);
+  --bs-info: var(--purple-accent);
+  --bs-warning: var(--purple-warning);
+  --bs-danger: var(--purple-danger);
+  --bs-light: var(--purple-bg-secondary);
+  --bs-dark: var(--purple-text-primary);
+}
+
+/* Utility Classes for Purple Theme */
+.text-purple-primary { color: var(--purple-primary) !important; }
+.text-purple-secondary { color: var(--purple-secondary-dark) !important; }
+.text-purple-accent { color: var(--purple-accent) !important; }
+.text-purple-gold { color: var(--purple-gold) !important; }
+
+.bg-purple-primary { background-color: var(--purple-primary) !important; }
+.bg-purple-secondary { background-color: var(--purple-secondary) !important; }
+.bg-purple-accent { background-color: var(--purple-accent) !important; }
+.bg-purple-light { background-color: var(--purple-bg-primary) !important; }
+
+.border-purple-primary { border-color: var(--purple-primary) !important; }
+.border-purple-secondary { border-color: var(--purple-secondary-dark) !important; }
+.border-purple-accent { border-color: var(--purple-accent) !important; }
+
+/* Purple Gradient Classes */
+.bg-gradient-purple-primary {
+  background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-primary-dark) 100%) !important;
+}
+
+.bg-gradient-purple-accent {
+  background: linear-gradient(135deg, var(--purple-accent) 0%, var(--purple-accent-dark) 100%) !important;
+}
+
+.bg-gradient-purple-light {
+  background: linear-gradient(135deg, var(--purple-secondary) 0%, var(--purple-secondary-light) 100%) !important;
+}
+
+/* Purple Button Styles */
+.btn-purple {
+  background: var(--purple-primary);
+  border-color: var(--purple-primary);
+  color: var(--purple-text-white);
+}
+
+.btn-purple:hover {
+  background: var(--purple-primary-dark);
+  border-color: var(--purple-primary-dark);
+  color: var(--purple-text-white);
+}
+
+.btn-purple:focus {
+  box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.btn-outline-purple {
+  color: var(--purple-primary);
+  border-color: var(--purple-primary);
+}
+
+.btn-outline-purple:hover {
+  background: var(--purple-primary);
+  border-color: var(--purple-primary);
+  color: var(--purple-text-white);
+}

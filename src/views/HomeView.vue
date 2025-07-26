@@ -4,30 +4,21 @@
     <section class="hero-section">
       <div class="hero-overlay"></div>
       <div class="container-fluid h-100">
-        <div class="row h-100 align-items-center">
-          <div class="col-lg-6 text-white hero-content">
+        <div class="row h-100 align-items-center justify-content-center">
+          <div class="col-lg-8 col-xl-6 text-white text-center hero-content">
             <div class="px-4 px-lg-5">
               <h1 class="display-3 fw-bold mb-4 hero-title">Our Charity</h1>
               <p class="lead mb-4 hero-subtitle">
                 Supporting Indigenous communities with comprehensive health services, traditional
                 medicine integration, and community wellness programs.
               </p>
-              <div class="hero-buttons">
-                <router-link to="/about" class="btn btn-light btn-lg me-3 mb-2">
+              <div class="hero-buttons d-flex justify-content-center gap-3 flex-wrap">
+                <router-link to="/about" class="btn btn-light btn-lg">
                   <i class="bi bi-info-circle me-2"></i>About Us
                 </router-link>
-                <router-link to="/events" class="btn btn-outline-light btn-lg mb-2">
-                  <i class="bi bi-calendar-event me-2"></i>Our Programs
+                <router-link to="/events" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-calendar-event me-2"></i>Our Events
                 </router-link>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6 text-center hero-image-col">
-            <div class="hero-image-container">
-              <div class="hero-image-placeholder">
-                <i class="bi bi-heart-pulse text-white hero-icon"></i>
-                <h3 class="text-white mt-3 mb-0">Health & Wellness</h3>
-                <p class="text-white-50 mt-2">For Indigenous Communities</p>
               </div>
             </div>
           </div>
@@ -75,8 +66,7 @@
                             :key="star"
                             class="star"
                             :class="{
-                              filled:
-                                star <= Math.round(dataStore.getAverageRating(event.id)),
+                              filled: star <= Math.round(dataStore.getAverageRating(event.id)),
                             }"
                           >
                             ★
@@ -128,18 +118,6 @@
                       {{ index === 0 ? 'Read More' : 'Join Us' }}
                     </router-link>
                   </div>
-
-                  <div class="col-md-4">
-                    <div
-                      class="image-placeholder bg-light rounded d-flex align-items-center justify-content-center"
-                      style="height: 200px"
-                    >
-                      <div class="text-center text-muted">
-                        <i class="bi bi-image" style="font-size: 3rem"></i>
-                        <p class="mt-2 mb-0">Program Image</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -181,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useDataStore } from '@/stores/data'
 
@@ -192,6 +170,19 @@ const dataStore = useDataStore()
 // Rating functionality
 const userRatings = reactive({})
 const hoverRatings = reactive({})
+
+// Watch for authentication changes
+watch(
+  () => authStore.isAuthenticated,
+  (newValue, oldValue) => {
+    // If user logged out (was authenticated, now not)
+    if (oldValue && !newValue) {
+      // Clear local rating state
+      Object.keys(userRatings).forEach((key) => delete userRatings[key])
+      Object.keys(hoverRatings).forEach((key) => delete hoverRatings[key])
+    }
+  },
+)
 
 // Set user rating for an event
 const setRating = (eventId, rating) => {
@@ -228,12 +219,15 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
-/* Full-screen hero section */
 .hero-section {
   position: relative;
   height: 100vh;
   min-height: 600px;
-  background: linear-gradient(135deg, #198754 0%, #20c997 50%, #0dcaf0 100%);
+  background-image: url('@/assets/images/Homepage_backgroundpic.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -245,33 +239,29 @@ const formatDate = (dateString) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 1;
-  pointer-events: none; /* Allow clicks to pass through overlay */
+  pointer-events: none;
 }
 
 .hero-content {
   position: relative;
   z-index: 10; /* Increase z-index to ensure buttons are clickable */
-  animation: slideInLeft 1s ease-out;
-}
-
-.hero-image-col {
-  position: relative;
-  z-index: 2;
-  animation: slideInRight 1s ease-out;
+  animation: fadeInUp 1s ease-out;
 }
 
 .hero-title {
   font-size: 4rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   animation: fadeInUp 1s ease-out 0.3s both;
 }
 
 .hero-subtitle {
   font-size: 1.3rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   animation: fadeInUp 1s ease-out 0.6s both;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .hero-buttons {
@@ -283,30 +273,9 @@ const formatDate = (dateString) => {
 .hero-buttons .btn {
   position: relative;
   z-index: 20; /* Highest z-index for clickable buttons */
-  pointer-events: auto; /* Ensure buttons are clickable */
-}
-
-.hero-image-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-}
-
-.hero-image-placeholder {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: float 6s ease-in-out infinite;
-}
-
-.hero-icon {
-  font-size: 6rem;
-  margin-bottom: 1rem;
-  animation: pulse 2s ease-in-out infinite;
+  pointer-events: auto;
+  min-width: 180px;
+  text-align: center;
 }
 
 .scroll-indicator {
@@ -323,29 +292,7 @@ const formatDate = (dateString) => {
   font-size: 2rem;
 }
 
-/* Animations */
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
+/* Animations implement*/
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -354,26 +301,6 @@ const formatDate = (dateString) => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
   }
 }
 
@@ -397,7 +324,7 @@ const formatDate = (dateString) => {
 .btn-light {
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
-  color: #198754;
+  color: var(--purple-primary);
   font-weight: 600;
   transition: all 0.3s ease;
   position: relative; /* Ensure proper positioning */
@@ -426,6 +353,12 @@ const formatDate = (dateString) => {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
+/* CTA Section specific button styling */
+.cta-section .btn-outline-light:hover {
+  background-color: var(--purple-accent);
+  border-color: var(--purple-accent);
+}
+
 /* CTA Section button fixes */
 .cta-section .btn {
   position: relative;
@@ -435,7 +368,7 @@ const formatDate = (dateString) => {
 
 /* Event cards styling */
 .featured-events {
-  background-color: #f8f9fa;
+  background-color: var(--purple-bg-primary);
 }
 
 .card {
@@ -449,11 +382,11 @@ const formatDate = (dateString) => {
 
 .card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 15px 35px var(--purple-shadow-black) !important;
 }
 
 .card-header {
-  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+  background: linear-gradient(135deg, var(--purple-text-primary) 0%, #495057 100%);
   border: none;
   padding: 1.5rem;
 }
@@ -466,7 +399,7 @@ const formatDate = (dateString) => {
 }
 
 .star.filled {
-  color: #ffc107;
+  color: var(--purple-gold);
 }
 
 .star-input {
@@ -479,7 +412,7 @@ const formatDate = (dateString) => {
 
 .star-input:hover,
 .star-input.active {
-  color: #ffc107;
+  color: var(--purple-gold);
 }
 
 .rating-input {
@@ -504,12 +437,11 @@ const formatDate = (dateString) => {
 }
 
 .indicator.active {
-  background-color: #198754;
+  background-color: var(--purple-primary);
 }
 
-/* Call to action section */
 .cta-section {
-  background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-primary-dark) 100%);
 }
 
 /* Responsive design */
@@ -517,6 +449,7 @@ const formatDate = (dateString) => {
   .hero-section {
     height: 100vh;
     min-height: 500px;
+    background-attachment: scroll;
   }
 
   .hero-title {
@@ -528,22 +461,21 @@ const formatDate = (dateString) => {
   }
 
   .hero-content {
-    text-align: center;
-    margin-bottom: 2rem;
+    padding: 0 1rem;
   }
 
-  .hero-image-placeholder {
-    padding: 2rem;
-  }
-
-  .hero-icon {
-    font-size: 4rem;
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
 
   .hero-buttons .btn {
-    display: block;
     width: 100%;
-    margin-bottom: 1rem;
+    max-width: 300px;
+    min-width: 200px;
+    margin: 0;
   }
 }
 
@@ -556,12 +488,13 @@ const formatDate = (dateString) => {
     font-size: 1rem;
   }
 
-  .hero-image-placeholder {
-    padding: 1.5rem;
+  .hero-content {
+    padding: 0 0.5rem;
   }
 
-  .hero-icon {
-    font-size: 3rem;
+  .hero-buttons .btn {
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
   }
 }
 </style>

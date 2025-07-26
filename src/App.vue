@@ -21,7 +21,8 @@
 
         <!-- Navigation Links -->
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
+          <div class="navbar-nav me-auto"></div>
+          <ul class="navbar-nav me-3">
             <li class="nav-item">
               <router-link class="nav-link" to="/">
                 <i class="bi bi-house me-1"></i>Home
@@ -43,21 +44,6 @@
               </router-link>
             </li>
           </ul>
-
-          <!-- Search Bar -->
-          <form class="d-flex me-3" @submit.prevent="handleSearch">
-            <div class="input-group">
-              <input
-                class="form-control"
-                type="search"
-                placeholder="Search..."
-                v-model="searchQuery"
-              />
-              <button class="btn btn-outline-light" type="submit">
-                <i class="bi bi-search"></i>
-              </button>
-            </div>
-          </form>
 
           <!-- Authentication Links -->
           <ul class="navbar-nav">
@@ -135,9 +121,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// Search functionality
-const searchQuery = ref('')
-
 // Watch for route changes to ensure proper navigation
 watch(
   () => route.fullPath,
@@ -145,7 +128,7 @@ watch(
     console.log('Route changed from', oldPath, 'to', newPath)
     // Force scroll to top on route change
     window.scrollTo(0, 0)
-    
+
     // Force a small delay to ensure DOM updates
     setTimeout(() => {
       // Additional check to ensure page content is updated
@@ -158,17 +141,8 @@ watch(
       }
     }, 100)
   },
-  { immediate: true } // Watch immediately on component mount
+  { immediate: true }, // Watch immediately on component mount
 )
-
-// Handle search form submission
-const handleSearch = () => {
-  if (searchQuery.value.trim()) {
-    // Navigate to search results page with query parameter
-    router.push({ name: 'search', query: { q: searchQuery.value } })
-    searchQuery.value = ''
-  }
-}
 
 // Handle user logout
 const logout = () => {
@@ -208,18 +182,6 @@ main {
 
 .nav-link:hover {
   color: #fff !important;
-}
-
-/* Search bar styling */
-.input-group {
-  width: 250px;
-}
-
-@media (max-width: 768px) {
-  .input-group {
-    width: 100%;
-    margin-top: 1rem;
-  }
 }
 
 /* Footer styling */
