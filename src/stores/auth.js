@@ -1,9 +1,7 @@
-// Authentication store using Pinia
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  // State variables for user authentication
   const user = ref(null)
   const isAuthenticated = ref(false)
 
@@ -33,9 +31,22 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated.value = false
     // Remove user data from localStorage
     localStorage.removeItem('user')
+    // Clear user ratings data when logging out
+    localStorage.removeItem('userRatings')
+
+    // Also clear the data store's user ratings if available
+    try {
+      import('./data').then(({ useDataStore }) => {
+        const dataStore = useDataStore()
+        if (dataStore.clearUserRatings) {
+          dataStore.clearUserRatings()
+        }
+      })
+    } catch (error) {
+      console.log('Data store not available during logout')
+    }
   }
 
-  // Check if user has specific role
   const hasRole = (role) => {
     return user.value?.role === role
   }

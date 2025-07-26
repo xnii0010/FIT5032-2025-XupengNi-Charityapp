@@ -79,12 +79,6 @@ const router = createRouter({
         requiresRole: 'admin', // Only accessible for admin users
       },
     },
-    {
-      path: '/search',
-      name: 'search',
-      component: () => import('../views/SearchView.vue'),
-      meta: { title: 'Search Results - Indigenous Health Charity' },
-    },
     // Catch-all route for 404 pages
     {
       path: '/:pathMatch(.*)*',
