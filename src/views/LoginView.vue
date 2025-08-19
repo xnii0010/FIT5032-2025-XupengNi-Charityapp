@@ -123,12 +123,11 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUserStore } from '@/stores/users'
+import { loginUser, getErrorMessage } from '@/firebase/auth'
 
 // Initialize router and stores
 const router = useRouter()
 const authStore = useAuthStore()
-const userStore = useUserStore()
 
 // Form data and validation
 const formData = ref({
@@ -185,7 +184,7 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-// Demo account functions - now using data from users.json
+// Demo account functions。 these are test accounts you can create in Firebase
 const fillDemoUser = () => {
   formData.value.email = 'user@example.com'
   formData.value.password = 'password123'
@@ -200,7 +199,7 @@ const fillDemoAdmin = () => {
   passwordError.value = ''
 }
 
-// Handle form submission
+// Handle form submission with Firebase Auth
 const handleLogin = async () => {
   // Validate all fields
   validateEmail()
@@ -214,28 +213,25 @@ const handleLogin = async () => {
   loginError.value = ''
 
   try {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const email = formData.value.email.trim()
+    const password = formData.value.password
 
-    // Use user store to authenticate
-    const { email, password } = formData.value
-    const authenticatedUser = userStore.authenticateUser(email, password)
+    // Use Firebase Auth to authenticate user
+    const authenticatedUser = await loginUser(email, password)
 
     if (authenticatedUser) {
       // Successful login
-      authStore.login(authenticatedUser)
-
       // Redirect to appropriate page based on role
       if (authenticatedUser.role === 'admin') {
         router.push('/dashboard')
       } else {
         router.push('/')
       }
-    } else {
-      loginError.value = 'Invalid email or password'
     }
   } catch (error) {
-    loginError.value = 'An error occurred during login. Please try again.'
+    console.error('Login error:', error)
+    // Use Firebase error message 
+    loginError.value = getErrorMessage(error.code)
   } finally {
     isLoading.value = false
   }

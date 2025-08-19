@@ -144,10 +144,16 @@ watch(
   { immediate: true }, // Watch immediately on component mount
 )
 
-// Handle user logout
-const logout = () => {
-  authStore.logout()
-  router.push('/')
+// Handle user logout with Firebase Auth
+const logout = async () => {
+  try {
+    await authStore.logout()
+    router.push('/')
+  } catch (error) {
+    console.error('Logout failed:', error)
+    // Redirect to home page even if logout fails
+    router.push('/')
+  }
 }
 </script>
 

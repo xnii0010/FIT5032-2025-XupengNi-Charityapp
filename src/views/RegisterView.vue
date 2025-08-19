@@ -191,12 +191,11 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUserStore } from '@/stores/users'
+import { registerUser, getErrorMessage } from '@/firebase/auth'
 
 // Initialize router and stores
 const router = useRouter()
 const authStore = useAuthStore()
-const userStore = useUserStore()
 
 // Form data
 const formData = ref({
@@ -338,7 +337,7 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-// Handle form submission
+// Handle form submission with Firebase Auth
 const handleRegister = async () => {
   // Validate all fields
   validateName()
@@ -358,45 +357,33 @@ const handleRegister = async () => {
   registerSuccess.value = ''
 
   try {
-    // Check if user already exists using user store
-    if (userStore.emailExists(formData.value.email)) {
-      registerError.value = 'An account with this email already exists'
+    const name = formData.value.name.trim()
+    const email = formData.value.email.trim()
+    const phone = formData.value.phone.trim()
+    const password = formData.value.password
+    const role = formData.value.role
+
+    if (!['user', 'volunteer', 'admin'].includes(role)) {
+      registerError.value = 'Invalid role selected'
       return
     }
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const newUser = await registerUser(email, password, name, phone)
 
-    // Create new user data
-    const userData = {
-      name: formData.value.name,
-      email: formData.value.email,
-      phone: formData.value.phone,
-      role: formData.value.role,
-      password: formData.value.password, // In real app, this should be hashed
+    if (newUser) {
+      registerSuccess.value = 'Account created successfully! Logging you in...'
+
+      setTimeout(() => {
+        if (newUser.role === 'admin') {
+          router.push('/dashboard')
+        } else {
+          router.push('/')
+        }
+      }, 1000)
     }
-
-    // Add user to the user store
-    const newUser = userStore.addUser(userData)
-
-    // Simulate successful registration
-    registerSuccess.value = 'Account created successfully! Logging you in...'
-
-    // Auto-login after successful registration (remove password from login data)
-    const loginData = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      phone: newUser.phone,
-      role: newUser.role,
-    }
-
-    setTimeout(() => {
-      authStore.login(loginData)
-      router.push('/')
-    }, 1000)
   } catch (error) {
-    registerError.value = 'An error occurred during registration. Please try again.'
+    console.error('Registration error:', error)
+    registerError.value = getErrorMessage(error.code)
   } finally {
     isLoading.value = false
   }
