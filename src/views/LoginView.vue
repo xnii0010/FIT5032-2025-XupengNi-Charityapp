@@ -266,7 +266,11 @@ const handleLogin = async () => {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--purple-primary-dark) 0%, var(--purple-primary-darker) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--purple-primary-dark) 0%,
+    var(--purple-primary-darker) 100%
+  );
 }
 
 .btn-primary:disabled {

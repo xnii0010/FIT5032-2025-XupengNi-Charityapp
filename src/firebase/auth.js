@@ -1,12 +1,13 @@
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
   updateProfile,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from './init.js'
+import { sendWelcomeEmail } from '../services/email.js'
 
 /**
  * Register a new user with email and password
@@ -14,36 +15,41 @@ import { auth, db } from './init.js'
  * @param {string} password - User's password
  * @param {string} name - User's display name
  * @param {string} phone - User's phone number
+ * @param {string} role - User's role (user, volunteer, admin)
  * @returns {Promise<Object>} User object with additional info
  */
-export const registerUser = async (email, password, name, phone) => {
+export const registerUser = async (email, password, name, phone, role = 'user') => {
   try {
-    // Create user with email and password
+    if (!['user', 'volunteer', 'admin'].includes(role)) {
+      throw new Error('Invalid role. Must be user, volunteer, or admin.')
+    }
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
-    
-    // Update user profile with display name
+
     await updateProfile(user, {
-      displayName: name
+      displayName: name,
     })
-    
-    // Save additional user data to Firestore
+
     await setDoc(doc(db, 'users', user.uid), {
       uid: user.uid,
       email: email,
       name: name,
       phone: phone,
-      role: 'user', // Default role
+      role: role,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     })
-    
+
+    // Send welcome email asynchronously
+    sendWelcomeEmail(email, name, phone, role).catch(() => {})
+
     return {
       uid: user.uid,
       email: user.email,
       name: name,
       phone: phone,
-      role: 'user'
+      role: role,
     }
   } catch (error) {
     console.error('Registration error:', error)
@@ -62,10 +68,10 @@ export const loginUser = async (email, password) => {
     // Sign in with email and password
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
-    
+
     // Get additional user data from Firestore
     const userDoc = await getDoc(doc(db, 'users', user.uid))
-    
+
     if (userDoc.exists()) {
       const userData = userDoc.data()
       return {
@@ -73,7 +79,7 @@ export const loginUser = async (email, password) => {
         email: user.email,
         name: userData.name || user.displayName,
         phone: userData.phone || '',
-        role: userData.role || 'user'
+        role: userData.role || 'user',
       }
     } else {
       // If no Firestore document exists, return basic user info
@@ -82,7 +88,7 @@ export const loginUser = async (email, password) => {
         email: user.email,
         name: user.displayName || '',
         phone: '',
-        role: 'user'
+        role: 'user',
       }
     }
   } catch (error) {
@@ -121,29 +127,24 @@ export const onAuthStateChange = (callback) => {
   return onAuthStateChanged(auth, async (user) => {
     if (user) {
       // User is signed in, get additional data from Firestore
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        if (userDoc.exists()) {
-          const userData = userDoc.data()
-          callback({
-            uid: user.uid,
-            email: user.email,
-            name: userData.name || user.displayName,
-            phone: userData.phone || '',
-            role: userData.role || 'user'
-          })
-        } else {
-          callback({
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName || '',
-            phone: '',
-            role: 'user'
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-        callback(null)
+      const userDoc = await getDoc(doc(db, 'users', user.uid))
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        callback({
+          uid: user.uid,
+          email: user.email,
+          name: userData.name || user.displayName,
+          phone: userData.phone || '',
+          role: userData.role || 'user',
+        })
+      } else {
+        callback({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || '',
+          phone: '',
+          role: 'user',
+        })
       }
     } else {
       // User is signed out
@@ -166,8 +167,8 @@ export const getErrorMessage = (errorCode) => {
     'auth/wrong-password': 'Incorrect password.',
     'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
     'auth/network-request-failed': 'Network error. Please check your connection.',
-    'auth/invalid-credential': 'Invalid email or password.'
+    'auth/invalid-credential': 'Invalid email or password.',
   }
-  
+
   return errorMessages[errorCode] || 'An unexpected error occurred. Please try again.'
 }

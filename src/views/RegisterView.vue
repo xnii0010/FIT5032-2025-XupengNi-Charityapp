@@ -368,7 +368,7 @@ const handleRegister = async () => {
       return
     }
 
-    const newUser = await registerUser(email, password, name, phone)
+    const newUser = await registerUser(email, password, name, phone, role)
 
     if (newUser) {
       registerSuccess.value = 'Account created successfully! Logging you in...'
