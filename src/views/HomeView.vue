@@ -36,87 +36,100 @@
       <div class="container">
         <h2 class="text-center mb-5">Featured Programs</h2>
 
-        <!-- Event Cards Carousel -->
-        <div class="row">
-          <div v-for="(event, index) in dataStore.events" :key="event.id" class="col-lg-6 mb-4">
-            <div class="card h-100 shadow-sm">
-              <div class="card-header bg-dark text-white">
-                <h5 class="card-title mb-0">{{ event.title }}</h5>
-              </div>
-
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-8">
-                    <p class="card-text">{{ event.description }}</p>
-                    <div class="mb-3">
-                      <small class="text-muted">
-                        <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
-                        <span class="ms-3">
-                          <i class="bi bi-calendar me-1"></i>{{ formatDate(event.date) }}
-                        </span>
-                      </small>
+        <!-- Event Cards Display -->
+        <div class="events-container">
+          <!-- Event Slides -->
+          <div class="events-slides">
+            <div
+              v-for="(slide, slideIndex) in eventSlides"
+              :key="slideIndex"
+              class="events-slide"
+              :class="{ active: slideIndex === currentSlide }"
+            >
+              <div class="row">
+                <div v-for="(event, eventIndex) in slide" :key="event.id" class="col-lg-6 mb-4">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                      <h5 class="card-title mb-0">{{ event.title }}</h5>
                     </div>
 
-                    <!-- Rating Display -->
-                    <div class="mb-3">
-                      <div class="d-flex align-items-center">
-                        <div class="me-2">
-                          <span
-                            v-for="star in 5"
-                            :key="star"
-                            class="star"
-                            :class="{
-                              filled: star <= Math.round(dataStore.getAverageRating(event.id)),
-                            }"
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-8">
+                          <p class="card-text">{{ event.description }}</p>
+                          <div class="mb-3">
+                            <small class="text-muted">
+                              <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                              <span class="ms-3">
+                                <i class="bi bi-calendar me-1"></i>{{ formatDate(event.date) }}
+                              </span>
+                            </small>
+                          </div>
+
+                          <!-- Rating Display -->
+                          <div class="mb-3">
+                            <div class="d-flex align-items-center">
+                              <div class="me-2">
+                                <span
+                                  v-for="star in 5"
+                                  :key="star"
+                                  class="star"
+                                  :class="{
+                                    filled:
+                                      star <= Math.round(dataStore.getAverageRating(event.id)),
+                                  }"
+                                >
+                                  ★
+                                </span>
+                              </div>
+                              <span class="text-muted">
+                                {{ dataStore.getAverageRating(event.id) }}
+                                ({{ event.ratings.length }} reviews)
+                              </span>
+                            </div>
+                          </div>
+
+                          <!-- User Rating Section (only for authenticated users) -->
+                          <div
+                            v-if="authStore.isAuthenticated && !dataStore.hasUserRated(event.id)"
+                            class="mb-3"
                           >
-                            ★
-                          </span>
+                            <label class="form-label">Rate this program:</label>
+                            <div class="rating-input">
+                              <span
+                                v-for="star in 5"
+                                :key="star"
+                                class="star-input"
+                                :class="{ active: star <= userRatings[event.id] }"
+                                @click="setRating(event.id, star)"
+                                @mouseover="hoverRating(event.id, star)"
+                                @mouseleave="resetHover(event.id)"
+                              >
+                                ★
+                              </span>
+                              <button
+                                v-if="userRatings[event.id]"
+                                class="btn btn-sm btn-primary ms-2"
+                                @click="submitRating(event.id)"
+                              >
+                                Submit Rating
+                              </button>
+                            </div>
+                          </div>
+
+                          <div v-if="dataStore.hasUserRated(event.id)" class="mb-3">
+                            <small class="text-success">
+                              <i class="bi bi-check-circle me-1"></i>
+                              You rated this program: {{ dataStore.getUserRating(event.id) }} stars
+                            </small>
+                          </div>
+
+                          <router-link :to="`/events/${event.id}`" class="btn btn-primary">
+                            {{ slideIndex === 0 && eventIndex === 0 ? 'Read More' : 'Join Us' }}
+                          </router-link>
                         </div>
-                        <span class="text-muted">
-                          {{ dataStore.getAverageRating(event.id) }}
-                          ({{ event.ratings.length }} reviews)
-                        </span>
                       </div>
                     </div>
-
-                    <!-- User Rating Section (only for authenticated users) -->
-                    <div
-                      v-if="authStore.isAuthenticated && !dataStore.hasUserRated(event.id)"
-                      class="mb-3"
-                    >
-                      <label class="form-label">Rate this program:</label>
-                      <div class="rating-input">
-                        <span
-                          v-for="star in 5"
-                          :key="star"
-                          class="star-input"
-                          :class="{ active: star <= userRatings[event.id] }"
-                          @click="setRating(event.id, star)"
-                          @mouseover="hoverRating(event.id, star)"
-                          @mouseleave="resetHover(event.id)"
-                        >
-                          ★
-                        </span>
-                        <button
-                          v-if="userRatings[event.id]"
-                          class="btn btn-sm btn-primary ms-2"
-                          @click="submitRating(event.id)"
-                        >
-                          Submit Rating
-                        </button>
-                      </div>
-                    </div>
-
-                    <div v-if="dataStore.hasUserRated(event.id)" class="mb-3">
-                      <small class="text-success">
-                        <i class="bi bi-check-circle me-1"></i>
-                        You rated this program: {{ dataStore.getUserRating(event.id) }} stars
-                      </small>
-                    </div>
-
-                    <router-link :to="`/events/${event.id}`" class="btn btn-primary">
-                      {{ index === 0 ? 'Read More' : 'Join Us' }}
-                    </router-link>
                   </div>
                 </div>
               </div>
@@ -124,14 +137,15 @@
           </div>
         </div>
 
-        <!-- Carousel Indicators -->
-        <div class="text-center mt-4">
-          <div class="carousel-indicators-custom">
+        <!-- Page Indicators -->
+        <div class="text-center mt-4" v-if="totalSlides > 1">
+          <div class="page-indicators">
             <span
-              v-for="(event, index) in dataStore.events"
+              v-for="(slide, index) in eventSlides"
               :key="index"
               class="indicator"
-              :class="{ active: index === 0 }"
+              :class="{ active: index === currentSlide }"
+              @click="goToSlide(index)"
             ></span>
           </div>
         </div>
@@ -159,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useDataStore } from '@/stores/data'
 
@@ -170,6 +184,28 @@ const dataStore = useDataStore()
 // Rating functionality
 const userRatings = reactive({})
 const hoverRatings = reactive({})
+
+// Carousel functionality
+const currentSlide = ref(0)
+const itemsPerSlide = 2
+
+// Computed property to group events into slides
+const eventSlides = computed(() => {
+  const slides = []
+  const events = dataStore.events
+  for (let i = 0; i < events.length; i += itemsPerSlide) {
+    slides.push(events.slice(i, i + itemsPerSlide))
+  }
+  return slides
+})
+
+// Total number of slides
+const totalSlides = computed(() => eventSlides.value.length)
+
+// Navigate to specific slide
+const goToSlide = (index) => {
+  currentSlide.value = index
+}
 
 // Watch for authentication changes
 watch(
@@ -420,24 +456,49 @@ const formatDate = (dateString) => {
   align-items: center;
 }
 
-/* Carousel indicators */
-.carousel-indicators-custom {
+/* Events Display Styles */
+.events-container {
+  border-radius: 12px;
+}
+
+.events-slides {
+  position: relative;
+  height: auto;
+}
+
+.events-slide {
+  display: none;
+}
+
+.events-slide.active {
+  display: block;
+}
+
+/* Page Indicators Styles */
+.page-indicators {
   display: flex;
   justify-content: center;
   gap: 10px;
+  margin-top: 20px;
 }
 
 .indicator {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #dee2e6;
+  background-color: #ddd;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.indicator:hover {
+  background-color: #999;
+  transform: scale(1.1);
 }
 
 .indicator.active {
   background-color: var(--purple-primary);
+  transform: scale(1.2);
 }
 
 .cta-section {
