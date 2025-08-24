@@ -228,8 +228,8 @@
                   <button class="btn btn-purple" @click="registerForEvent">
                     <i class="bi bi-calendar-plus me-2"></i>Register for Event
                   </button>
-                  <button class="btn btn-outline-purple" @click="shareEvent">
-                    <i class="bi bi-share me-2"></i>Share Event
+                  <button class="btn btn-outline-purple" @click="exportToCSV">
+                    <i class="bi bi-download me-2"></i>Export Event Data
                   </button>
                   <router-link to="/support" class="btn btn-outline-purple">
                     <i class="bi bi-question-circle me-2"></i>Ask Questions
@@ -376,13 +376,62 @@ const getRatingPercentage = (rating) => {
   return (count / event.value.ratings.length) * 100
 }
 
-// Action functions
 const registerForEvent = () => {
   alert('Register for event function will be implemented here.')
 }
 
-const shareEvent = () => {
-  alert('Share event function will be implemented here.')
+// Export functions - Export event data to CSV format
+const exportToCSV = () => {
+  try {
+    const csvData = [
+      ['Field', 'Value'],
+      ['ID', event.value.id || 'N/A'],
+      ['Title', event.value.title || 'N/A'],
+      ['Description', event.value.description || 'N/A'],
+      ['Date', event.value.date ? formatDate(event.value.date) : 'N/A'],
+      ['Location', event.value.location || 'N/A'],
+      ['Organizer', event.value.organizer || 'N/A'],
+      ['Category', event.value.category || 'N/A'],
+      ['Capacity', event.value.capacity || 'N/A'],
+      ['Total Ratings', event.value.ratings ? event.value.ratings.length : 'N/A'],
+    ]
+
+    // Convert to CSV string with proper escaping
+    const csvContent = csvData
+      .map((row) =>
+        row
+          .map((field) => {
+            const stringField = String(field)
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            if (
+              stringField.includes(',') ||
+              stringField.includes('"') ||
+              stringField.includes('\n')
+            ) {
+              return `"${stringField.replace(/"/g, '""')}"`
+            }
+            return stringField
+          })
+          .join(','),
+      )
+      .join('\n')
+
+    // Create blob and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const downloadLink = document.createElement('a')
+    downloadLink.href = url
+    downloadLink.download = `event_${event.value.id}_data.csv`
+
+    // Trigger download
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    alert('Failed to export event data. Please try again.')
+  }
 }
 
 // Format date for display
