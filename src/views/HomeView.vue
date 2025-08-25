@@ -1,7 +1,7 @@
 <template>
   <div class="home-page">
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" role="banner" aria-label="Hero section">
       <div class="hero-overlay"></div>
       <div class="container-fluid h-100">
         <div class="row h-100 align-items-center justify-content-center">
@@ -13,11 +13,19 @@
                 medicine integration, and community wellness programs.
               </p>
               <div class="hero-buttons d-flex justify-content-center gap-3 flex-wrap">
-                <router-link to="/about" class="btn btn-light btn-lg">
-                  <i class="bi bi-info-circle me-2"></i>About Us
+                <router-link
+                  to="/about"
+                  class="btn btn-light btn-lg"
+                  aria-label="Learn more about our organization"
+                >
+                  <i class="bi bi-info-circle me-2" aria-hidden="true"></i>About Us
                 </router-link>
-                <router-link to="/events" class="btn btn-outline-light btn-lg">
-                  <i class="bi bi-calendar-event me-2"></i>Our Events
+                <router-link
+                  to="/events"
+                  class="btn btn-outline-light btn-lg"
+                  aria-label="View our upcoming events and programs"
+                >
+                  <i class="bi bi-calendar-event me-2" aria-hidden="true"></i>Our Events
                 </router-link>
               </div>
             </div>
@@ -26,107 +34,141 @@
       </div>
 
       <!-- Scroll indicator -->
-      <div class="scroll-indicator">
-        <i class="bi bi-chevron-down text-white"></i>
+      <div
+        class="scroll-indicator"
+        role="button"
+        tabindex="0"
+        aria-label="Scroll down to view featured programs"
+        @click="scrollToFeatured"
+        @keydown.enter="scrollToFeatured"
+        @keydown.space.prevent="scrollToFeatured"
+      >
+        <i class="bi bi-chevron-down text-white" aria-hidden="true"></i>
       </div>
     </section>
 
     <!-- Featured Events Section -->
-    <section class="featured-events py-5">
-      <div class="container">
-        <h2 class="text-center mb-5">Featured Programs</h2>
+    <main id="main-content" role="main">
+      <section class="featured-events py-5" aria-label="Featured programs section">
+        <div class="container">
+          <h2 class="text-center mb-5">Featured Programs</h2>
 
-        <!-- Event Cards Display -->
-        <div class="events-container">
-          <!-- Event Slides -->
-          <div class="events-slides">
-            <div
-              v-for="(slide, slideIndex) in eventSlides"
-              :key="slideIndex"
-              class="events-slide"
-              :class="{ active: slideIndex === currentSlide }"
-            >
-              <div class="row">
-                <div v-for="(event, eventIndex) in slide" :key="event.id" class="col-lg-6 mb-4">
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                      <h5 class="card-title mb-0">{{ event.title }}</h5>
-                    </div>
+          <!-- Event Cards Display -->
+          <div class="events-container">
+            <!-- Event Slides -->
+            <div class="events-slides">
+              <div
+                v-for="(slide, slideIndex) in eventSlides"
+                :key="slideIndex"
+                class="events-slide"
+                :class="{ active: slideIndex === currentSlide }"
+              >
+                <div class="row">
+                  <div v-for="(event, eventIndex) in slide" :key="event.id" class="col-lg-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                      <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">{{ event.title }}</h5>
+                      </div>
 
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-8">
-                          <p class="card-text">{{ event.description }}</p>
-                          <div class="mb-3">
-                            <small class="text-muted">
-                              <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
-                              <span class="ms-3">
-                                <i class="bi bi-calendar me-1"></i>{{ formatDate(event.date) }}
-                              </span>
-                            </small>
-                          </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-8">
+                            <p class="card-text">{{ event.description }}</p>
+                            <div class="mb-3">
+                              <small class="text-muted">
+                                <i class="bi bi-geo-alt me-1"></i>{{ event.location }}
+                                <span class="ms-3">
+                                  <i class="bi bi-calendar me-1"></i>{{ formatDate(event.date) }}
+                                </span>
+                              </small>
+                            </div>
 
-                          <!-- Rating Display -->
-                          <div class="mb-3">
-                            <div class="d-flex align-items-center">
-                              <div class="me-2">
-                                <span
-                                  v-for="star in 5"
-                                  :key="star"
-                                  class="star"
-                                  :class="{
-                                    filled:
-                                      star <= Math.round(dataStore.getAverageRating(event.id)),
-                                  }"
+                            <!-- Rating Display -->
+                            <div class="mb-3">
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="me-2"
+                                  role="img"
+                                  :aria-label="`Rating: ${dataStore.getAverageRating(event.id)} out of 5 stars`"
                                 >
-                                  ★
+                                  <span
+                                    v-for="star in 5"
+                                    :key="star"
+                                    class="star"
+                                    :class="{
+                                      filled:
+                                        star <= Math.round(dataStore.getAverageRating(event.id)),
+                                    }"
+                                    aria-hidden="true"
+                                  >
+                                    ★
+                                  </span>
+                                </div>
+                                <span class="text-muted">
+                                  {{ dataStore.getAverageRating(event.id) }}
+                                  ({{ event.ratings.length }} reviews)
                                 </span>
                               </div>
-                              <span class="text-muted">
-                                {{ dataStore.getAverageRating(event.id) }}
-                                ({{ event.ratings.length }} reviews)
-                              </span>
                             </div>
-                          </div>
 
-                          <!-- User Rating Section (only for authenticated users) -->
-                          <div
-                            v-if="authStore.isAuthenticated && !dataStore.hasUserRated(event.id)"
-                            class="mb-3"
-                          >
-                            <label class="form-label">Rate this program:</label>
-                            <div class="rating-input">
-                              <span
-                                v-for="star in 5"
-                                :key="star"
-                                class="star-input"
-                                :class="{ active: star <= userRatings[event.id] }"
-                                @click="setRating(event.id, star)"
-                                @mouseover="hoverRating(event.id, star)"
-                                @mouseleave="resetHover(event.id)"
-                              >
-                                ★
-                              </span>
-                              <button
-                                v-if="userRatings[event.id]"
-                                class="btn btn-sm btn-primary ms-2"
-                                @click="submitRating(event.id)"
-                              >
-                                Submit Rating
-                              </button>
+                            <!-- User Rating Section (only for authenticated users) -->
+                            <div
+                              v-if="authStore.isAuthenticated && !dataStore.hasUserRated(event.id)"
+                              class="mb-3"
+                            >
+                              <fieldset>
+                                <legend class="form-label">Rate this program:</legend>
+                                <div
+                                  class="rating-input"
+                                  role="radiogroup"
+                                  :aria-label="`Rate ${event.title}`"
+                                >
+                                  <button
+                                    v-for="star in 5"
+                                    :key="star"
+                                    type="button"
+                                    class="star-input"
+                                    :class="{ active: star <= userRatings[event.id] }"
+                                    :aria-label="`${star} star${star > 1 ? 's' : ''}`"
+                                    :aria-pressed="star <= userRatings[event.id]"
+                                    role="radio"
+                                    :aria-checked="star === userRatings[event.id]"
+                                    @click="setRating(event.id, star)"
+                                    @mouseover="hoverRating(event.id, star)"
+                                    @mouseleave="resetHover(event.id)"
+                                    @keydown.enter="setRating(event.id, star)"
+                                    @keydown.space.prevent="setRating(event.id, star)"
+                                  >
+                                    ★
+                                  </button>
+                                  <button
+                                    v-if="userRatings[event.id]"
+                                    class="btn btn-sm btn-primary ms-2"
+                                    @click="submitRating(event.id)"
+                                    :aria-label="`Submit ${userRatings[event.id]} star rating for ${event.title}`"
+                                  >
+                                    Submit Rating
+                                  </button>
+                                </div>
+                              </fieldset>
                             </div>
-                          </div>
 
-                          <div v-if="dataStore.hasUserRated(event.id)" class="mb-3">
-                            <small class="text-success">
-                              <i class="bi bi-check-circle me-1"></i>
-                              You rated this program: {{ dataStore.getUserRating(event.id) }} stars
-                            </small>
-                          </div>
+                            <div v-if="dataStore.hasUserRated(event.id)" class="mb-3">
+                              <small class="text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                You rated this program:
+                                {{ dataStore.getUserRating(event.id) }} stars
+                              </small>
+                            </div>
 
-                          <router-link :to="`/events/${event.id}`" class="btn btn-primary">
-                            {{ slideIndex === 0 && eventIndex === 0 ? 'Read More' : 'Join Us' }}
-                          </router-link>
+                            <router-link
+                              :to="`/events/${event.id}`"
+                              class="btn btn-primary"
+                              :aria-label="`${slideIndex === 0 && eventIndex === 0 ? 'Read more about' : 'Join'} ${event.title}`"
+                            >
+                              {{ slideIndex === 0 && eventIndex === 0 ? 'Read More' : 'Join Us' }}
+                            </router-link>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -135,36 +177,53 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Page Indicators -->
-        <div class="text-center mt-4" v-if="totalSlides > 1">
-          <div class="page-indicators">
-            <span
-              v-for="(slide, index) in eventSlides"
-              :key="index"
-              class="indicator"
-              :class="{ active: index === currentSlide }"
-              @click="goToSlide(index)"
-            ></span>
+          <!-- Page Indicators -->
+          <div class="text-center mt-4" v-if="totalSlides > 1">
+            <div class="page-indicators" role="tablist" aria-label="Program slides navigation">
+              <button
+                v-for="(slide, index) in eventSlides"
+                :key="index"
+                class="indicator"
+                :class="{ active: index === currentSlide }"
+                :aria-selected="index === currentSlide"
+                :aria-label="`Go to slide ${index + 1} of ${totalSlides}`"
+                role="tab"
+                @click="goToSlide(index)"
+                @keydown.enter="goToSlide(index)"
+                @keydown.space.prevent="goToSlide(index)"
+              ></button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </main>
 
     <!-- Call to Action Section -->
-    <section class="cta-section bg-primary text-white py-5">
+    <section
+      class="cta-section bg-primary text-white py-5"
+      role="complementary"
+      aria-label="Call to action"
+    >
       <div class="container text-center">
         <h2 class="mb-4">Join Our Mission</h2>
         <p class="lead mb-4">
           Help us make a difference in Indigenous communities across Australia
         </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-          <router-link to="/register" class="btn btn-light btn-lg">
-            <i class="bi bi-person-plus me-2"></i>Get Involved
+          <router-link
+            to="/register"
+            class="btn btn-light btn-lg"
+            aria-label="Register to get involved with our programs"
+          >
+            <i class="bi bi-person-plus me-2" aria-hidden="true"></i>Get Involved
           </router-link>
-          <router-link to="/support" class="btn btn-outline-light btn-lg">
-            <i class="bi bi-telephone me-2"></i>Contact Us
+          <router-link
+            to="/support"
+            class="btn btn-outline-light btn-lg"
+            aria-label="Contact us for support or questions"
+          >
+            <i class="bi bi-telephone me-2" aria-hidden="true"></i>Contact Us
           </router-link>
         </div>
       </div>
@@ -252,9 +311,30 @@ const formatDate = (dateString) => {
     day: 'numeric',
   })
 }
+
+const scrollToFeatured = () => {
+  // Scroll to featured events section
+  const featuredSection = document.querySelector('.featured-events')
+  if (featuredSection) {
+    featuredSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <style scoped>
+.btn:focus,
+.star-input:focus,
+.indicator:focus,
+.scroll-indicator:focus {
+  outline: 3px solid #dc3545;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 .hero-section {
   position: relative;
   height: 100vh;
@@ -322,6 +402,15 @@ const formatDate = (dateString) => {
   z-index: 2;
   animation: bounce 2s infinite;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.scroll-indicator:hover,
+.scroll-indicator:focus {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .scroll-indicator i {
@@ -444,6 +533,14 @@ const formatDate = (dateString) => {
   margin-right: 2px;
   cursor: pointer;
   transition: color 0.2s ease;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.star-input:focus {
+  background: rgba(0, 123, 255, 0.1);
 }
 
 .star-input:hover,
@@ -489,6 +586,13 @@ const formatDate = (dateString) => {
   background-color: #ddd;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: none;
+  padding: 8px;
+  margin: 0 4px;
+}
+
+.indicator:focus {
+  transform: scale(1.3);
 }
 
 .indicator:hover {
